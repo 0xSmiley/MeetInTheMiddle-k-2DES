@@ -147,30 +147,32 @@ class des():
         self.text = text
         
         self.generatechaves() #Generate all the chaves
-        text_blocks = nsplit(self.text, 8) #Split the text in blocks of 8 bytes so 64 bits
+        #text_blocks = nsplit(self.text, 8) #Split the text in blocks of 8 bytes so 64 bits
         result = list()
-        print("texto ",self.text)
+        block=self.text
         #TODO
-        for block in text_blocks:#Loop over all the blocks of data
-            block = string_to_bit_array(block)#Convert the block in bit array
+        
+        #block = string_to_bit_array(block)#Convert the block in bit array
 
-            block = self.permut(block,PI)#Apply the initial permutation
-            g, d = nsplit(block, 32) #g(LEFT), d(RIGHT)
-            tmp = None
-            for i in range(16): #Do the 16 rounds
-                d_e = self.expand(d, E) #Expand d to match Ki size (48bits)
-                if action == ENCRYPT:
-                    tmp = self.xor(self.chaves[i], d_e)#If encrypt use Ki
-                else:
-                    tmp = self.xor(self.chaves[15-i], d_e)#If decrypt start by the last key
-                tmp = self.substitute(tmp) #Method that will apply the SBOXes
-                tmp = self.permut(tmp, P)
-                tmp = self.xor(g, tmp)
-                g = d
-                d = tmp
-            result += self.permut(d+g, PI_1) #Do the last permut and append the result to result
+        block = self.permut(block,PI)#Apply the initial permutation
+        g, d = nsplit(block, 32) #g(LEFT), d(RIGHT)
+        tmp = None
+        for i in range(16): #Do the 16 rounds
+            d_e = self.expand(d, E) #Expand d to match Ki size (48bits)
+            if action == ENCRYPT:
+                tmp = self.xor(self.chaves[i], d_e)#If encrypt use Ki
+            else:
+                tmp = self.xor(self.chaves[15-i], d_e)#If decrypt start by the last key
+            tmp = self.substitute(tmp) #Method that will apply the SBOXes
+            tmp = self.permut(tmp, P)
+            tmp = self.xor(g, tmp)
+            g = d
+            d = tmp
+        result += self.permut(d+g, PI_1) #Do the last permut and append the result to result
+
         final_res = bit_array_to_string(result)
         if padding and action==DECRYPT:
+            
             return self.removePadding(final_res) #Remove the padding if decrypt and padding is true
         else:
             return final_res #Return the final string of data ciphered/deciphered
@@ -222,7 +224,9 @@ class des():
         return self.run(key, text, ENCRYPT, padding)
     
     def decrypt(self, key, text, padding=False):
-        return self.run(key, text, DECRYPT, padding)
+        tmp= self.run(key, text, DECRYPT, padding)
+        print("decifrando ",tmp)
+        return tmp
     
 
 '''
@@ -235,11 +239,20 @@ print "Ciphered: %r" % r
 print "Deciphered: ", r2
 '''
 
-m1=bin(int("4698ee4949812cb6", 16))[2:]
-c1=bin(int("370d99dd25c5f447", 16))[2:]
-m2=bin(int("b146d0f5e596a736", 16))[2:]
-c2=bin(int("95e412e84cf112d3", 16))[2:]
-print(m1,len(m1))
+m1=list(bin(int("4698ee4949812cb6", 16))[2:])
+c1=list(bin(int("370d99dd25c5f447", 16))[2:])
+m2=list(bin(int("b146d0f5e596a736", 16))[2:])
+c2=list(bin(int("95e412e84cf112d3", 16))[2:])
+
+m1=map(int,m1)
+c1=map(int,c1)
+m2=map(int,m2)
+c2=map(int,c2)
+m1.insert(0,0)
+c1.insert(0,0)
+m2.insert(0,0)
+c2.insert(0,0)
+
 n = 16
 uns='1'*48
 lst = list(itertools.product([0, 1], repeat=n))
@@ -257,8 +270,8 @@ for i in range(0,size):
         chaves=map(int,chaves)
         d=des()
         cifras=d.encrypt(chaves,m1)
-        decifras=d.decrypt(chaves,c1)
         print("cifra ", cifras)
+        decifras=d.decrypt(chaves,c1)
         print("decifras ",decifras)
         break
         if cifras==decifras:
