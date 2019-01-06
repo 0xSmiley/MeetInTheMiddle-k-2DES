@@ -1,0 +1,5 @@
+16-2DES
+	(0x4698ee4949812cb6,0x370d99dd25c5f447)
+	(0xb146d0f5e596a736,0x95e412e84cf112d3)
+Key1=0x1ffffffffffffb08aL
+Key2=0xfffffffffffff2c6L

@@ -4,13 +4,13 @@ import struct
 
 #Initial permut matrix for the datas
 PI = [58, 50, 42, 34, 26, 18, 10, 2,
-      60, 52, 44, 36, 28, 20, 12, 4,
-      62, 54, 46, 38, 30, 22, 14, 6,
-      64, 56, 48, 40, 32, 24, 16, 8,
-      57, 49, 41, 33, 25, 17, 9, 1,
-      59, 51, 43, 35, 27, 19, 11, 3,
-      61, 53, 45, 37, 29, 21, 13, 5,
-      63, 55, 47, 39, 31, 23, 15, 7]
+    60, 52, 44, 36, 28, 20, 12, 4,
+    62, 54, 46, 38, 30, 22, 14, 6,
+    64, 56, 48, 40, 32, 24, 16, 8,
+    57, 49, 41, 33, 25, 17, 9, 1,
+    59, 51, 43, 35, 27, 19, 11, 3,
+    61, 53, 45, 37, 29, 21, 13, 5,
+    63, 55, 47, 39, 31, 23, 15, 7]
 
 #Initial permut made on the key
 CP_1 = [57, 49, 41, 33, 25, 17, 9,
@@ -148,18 +148,14 @@ class des():
         self.text = text
         
         self.generatechaves() #Generate all the chaves
-        
         #text_blocks = nsplit(self.text, 8) #Split the text in blocks of 8 bytes so 64 bits
         result = list()
-        
         block=self.text
-        #TODO
         
         #block = string_to_bit_array(block)#Convert the block in bit array
         #if action==DECRYPT:
-        
         block = self.permut(block,PI)#Apply the initial permutation
-        
+
         g, d = nsplit(block, 32) #g(LEFT), d(RIGHT)
         tmp = None
         for i in range(16): #Do the 16 rounds
@@ -234,10 +230,10 @@ print "Ciphered: %r" % r
 print "Deciphered: ", r2
 '''
 
-m1=list(bin(int("4698ee4949812cb6", 16))[2:])
-c1=list(bin(int("370d99dd25c5f447", 16))[2:])
-m2=list(bin(int("b146d0f5e596a736", 16))[2:])
-c2=list(bin(int("95e412e84cf112d3", 16))[2:])
+m1=list(bin(int("61cae1cbe10bee15", 16))[2:])
+c1=list(bin(int("4be8f15057d5fc36", 16))[2:])
+m2=list(bin(int("a2db91efb628c09a", 16))[2:])
+c2=list(bin(int("43e3a75620ae04a0", 16))[2:])
 
 m1=map(int,m1)
 c1=map(int,c1)
@@ -253,6 +249,21 @@ while len(m2) !=64:
 while len(c2) !=64:
     c2.insert(0,0)
 
+'''
+test=list(bin(int("027b426ac4d9c12f", 16))[2:])
+test=map(int,test)
+while len(test)!=64:
+    test.insert(0,0)
+
+tmpkey1=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0]
+tmpkey2=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0]
+v=des()
+rep=v.encrypt(tmpkey1,test)
+rep=list(rep)
+rep=map(int,rep)
+
+print("yoyo",v.encrypt(tmpkey2,rep))
+'''
 
 n = 16
 uns='1'*48
@@ -261,32 +272,32 @@ size=len(lst)
 chavestmp= [None]*size
 for i in range(0,size):
     chavestmp[i]=''.join(str(e) for e in lst[i])
-    chavestmp[i]+=uns
+    chavestmp[i]=uns+chavestmp[i]
 
-
+cifras=[None]*size
+decifras=[None]*size
 
 for i in range(0,size):
+    
     try:
         chaves=list(chavestmp[i])
         chaves=map(int,chaves)
         d=des()
         
         #print("cifra ", chaves)
-        
-        cifras=d.encrypt(chaves,m1)
-        print("cifra ", len(cifras))
-        decifras=d.decrypt(chaves,c1)
-        print("decifras ",len(decifras))
-        
-        if cifras==decifras:
-            print(1)
-            tmp1=d.encrypt(chaves,m2)
-            tmp2=d.decrypt(chaves,c2)
-            if(tmp1==tmp2):
-                print(str(chaves)+" "+i)
+        cifras[i]=d.encrypt(chaves,m2)
+        decifras[i]=d.decrypt(chaves,c2)
+        #print(cifras[i])
+        #print(decifras[i])
 
 
     except Exception as e:
         print(e)
         break
         #print("Execpt-> "+str(chaves[i])+" Valor de i-> "+str(i) )
+
+
+for j in range (0,size):
+    for t in range (0,size):
+        if cifras[j]==decifras[t]:
+            print(j,t,chavestmp[j],chavestmp[t])
