@@ -1,5 +1,7 @@
 import itertools
-import struct
+import timeit
+import collections
+
 #-*- coding: utf8 -*-
 
 #Initial permut matrix for the datas
@@ -133,6 +135,27 @@ def binvalue(val, bitsize): #Return the binary value as a string of the given si
 def nsplit(s, n):#Split a list into sublists of size "n"
     return [s[k:k+n] for k in xrange(0, len(s), n)]
 
+def hexKey2Bin(key):
+        tmp=list(bin(int(key,16))[2:])
+        tmp=map(int,tmp)
+        while len(tmp) != 64:
+            tmp.insert(0,0)
+        return tmp
+
+def gerarNchaves(n):
+    uns='1'*(64-n)
+    lst = list(itertools.product([0, 1], repeat=n))
+    size=len(lst)
+    chavestmp= [None]*size
+    for i in range(0,size):
+        chavestmp[i]=''.join(str(e) for e in lst[i])
+        chavestmp[i]=uns+chavestmp[i]
+    return chavestmp
+
+def bin2hex(n):
+    return int(n,2)
+
+
 ENCRYPT=1
 DECRYPT=0
 
@@ -218,77 +241,36 @@ class des():
     def decrypt(self, key, text, padding=False):
         tmp= self.run(key, text, DECRYPT, padding)
         return tmp
-    
 
-'''
-key = "secret_k"
-text= "Hello wo"
-d = des()
-r = d.encrypt(key,text)
-r2 = d.decrypt(key,r)
-print "Ciphered: %r" % r
-print "Deciphered: ", r2
-'''
+start = timeit.default_timer()
 
-m1=list(bin(int("61cae1cbe10bee15", 16))[2:])
-c1=list(bin(int("4be8f15057d5fc36", 16))[2:])
-m2=list(bin(int("a2db91efb628c09a", 16))[2:])
-c2=list(bin(int("43e3a75620ae04a0", 16))[2:])
+m1=hexKey2Bin("61cae1cbe10bee15")
+c1=hexKey2Bin("4be8f15057d5fc36")
+m2=hexKey2Bin("a2db91efb628c09a")
+c2=hexKey2Bin("43e3a75620ae04a0")
 
-m1=map(int,m1)
-c1=map(int,c1)
-m2=map(int,m2)
-c2=map(int,c2)
 
-while len(m1) !=64:
-    m1.insert(0,0)
-while len(c1) !=64:
-    c1.insert(0,0)
-while len(m2) !=64:
-    m2.insert(0,0)
-while len(c2) !=64:
-    c2.insert(0,0)
+chavestmp=gerarNchaves(20)
+size=len(chavestmp)
 
-'''
-test=list(bin(int("027b426ac4d9c12f", 16))[2:])
-test=map(int,test)
-while len(test)!=64:
-    test.insert(0,0)
+stop = timeit.default_timer()
+print("Chaves Geradas ",stop-start)
 
-tmpkey1=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0]
-tmpkey2=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0]
-v=des()
-rep=v.encrypt(tmpkey1,test)
-rep=list(rep)
-rep=map(int,rep)
-
-print("yoyo",v.encrypt(tmpkey2,rep))
-'''
-
-n = 20
-uns='1'*44
-lst = list(itertools.product([0, 1], repeat=n))
-size=len(lst)
-chavestmp= [None]*size
-for i in range(0,size):
-    chavestmp[i]=''.join(str(e) for e in lst[i])
-    chavestmp[i]=uns+chavestmp[i]
-
-cifras=[None]*size
-decifras=[None]*size
+cifras={}
+decifras={}
 
 for i in range(0,size):
     
     try:
         chaves=list(chavestmp[i])
         chaves=map(int,chaves)
+
         d=des()
-        
-        #print("cifra ", chaves)
-        cifras[i]=d.encrypt(chaves,m2)
-        decifras[i]=d.decrypt(chaves,c2)
-        #print(cifras[i])
-        #print(decifras[i])
+        cifrastmp=d.encrypt(chaves,m2)
+        decifrastmp=d.decrypt(chaves,c2)
+
+        cifras.update({bit_array_to_string(chaves):cifrastmp})
+        decifras.update({bit_array_to_string(chaves):decifrastmp})
 
 
     except Exception as e:
@@ -296,8 +278,20 @@ for i in range(0,size):
         break
         #print("Execpt-> "+str(chaves[i])+" Valor de i-> "+str(i) )
 
+stop = timeit.default_timer()
+print("Cifras Completas",stop-start)
+'''
+print("Ordenando")
+c=collections.OrderedDict(sorted(cifras.items()))
+stop = timeit.default_timer()
+print("Ordenacao Cifra ",stop-start)
 
-for j in range (0,size):
-    for t in range (0,size):
-        if cifras[j]==decifras[t]:
-            print(j,t,chavestmp[j],chavestmp[t])
+d=collections.OrderedDict(sorted(decifras.items()))
+stop = timeit.default_timer()
+print("Ordenacao Decifra ",stop-start)
+'''
+for x,y in cifras.iteritems():
+    if y in decifras.items():
+        print(decifras.keys()[decifras.values().index(y)],x)
+stop = timeit.default_timer()
+print("Terminou",stop-start)
