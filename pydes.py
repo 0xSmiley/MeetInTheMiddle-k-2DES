@@ -265,8 +265,8 @@ rep=map(int,rep)
 print("yoyo",v.encrypt(tmpkey2,rep))
 '''
 
-n = 16
-uns='1'*48
+n = 20
+uns='1'*44
 lst = list(itertools.product([0, 1], repeat=n))
 size=len(lst)
 chavestmp= [None]*size
