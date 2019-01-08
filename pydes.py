@@ -259,24 +259,18 @@ print("Chaves Geradas ",stop-start)
 cifras={}
 decifras={}
 
-for i in range(0,size):
-    
-    try:
-        chaves=list(chavestmp[i])
-        chaves=map(int,chaves)
+for i in xrange(0,size):
 
-        d=des()
-        cifrastmp=d.encrypt(chaves,m2)
-        decifrastmp=d.decrypt(chaves,c2)
+    chaves=list(chavestmp[i])
+    chaves=map(int,chaves)
 
-        cifras.update({bit_array_to_string(chaves):cifrastmp})
-        decifras.update({bit_array_to_string(chaves):decifrastmp})
+    d=des()
+    cifrastmp=d.encrypt(chaves,m2)
+    decifrastmp=d.decrypt(chaves,c2)
 
+    cifras.update({bit_array_to_string(chaves):cifrastmp})
+    decifras.update({bit_array_to_string(chaves):decifrastmp})
 
-    except Exception as e:
-        print(e)
-        break
-        #print("Execpt-> "+str(chaves[i])+" Valor de i-> "+str(i) )
 
 stop = timeit.default_timer()
 print("Cifras Completas",stop-start)
