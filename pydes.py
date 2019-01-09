@@ -257,13 +257,13 @@ class des():
 
 start = timeit.default_timer()
 
-m1=hexKey2Bin("61cae1cbe10bee15")
-c1=hexKey2Bin("4be8f15057d5fc36")
-m2=hexKey2Bin("a2db91efb628c09a")
-c2=hexKey2Bin("43e3a75620ae04a0")
+m1=hexKey2Bin("d9a4b7074ee30723")
+c1=hexKey2Bin("061cfed7bfd12b12")
+m2=hexKey2Bin("96770ef6bfc2d811")
+c2=hexKey2Bin("0e3bc5a6386ce92b")
 
 
-chavestmp=gerarNchaves(20)
+chavestmp=gerarNchaves(24)
 size=len(chavestmp)
 
 stop = timeit.default_timer()
@@ -311,7 +311,7 @@ valDecript=d.values()
 for x,y in cifras.iteritems():
     tmp=binary_search(chavesDecript,x)
     if tmp!=-1:
-        print(valDecript[tmp],x,y)
+        print(y,valDecript[tmp])
 
 stop = timeit.default_timer()
 print("Terminou",stop-start)

@@ -1,0 +1,36 @@
+
+	Considera o seguinte cripto-sistema baseado no DES:
+		- o k-2DES resulta da aplicação de um 2DES (um DES duplo)
+		- no DES aplicado as S-boxes 1 e 2 forma trocadas
+		- as chaves usada têm somente k bits, sendo o resto dos bits  que perfazem o bloco de 64 bits com valor 1
+		- os bits constantes de valor 1 são os (64-k) bits mais significativos do bloco.
+		
+	Assim uma chave de um k-2DES é composta por dois grupos de k bits, que têm que ser complementados por bits 1 em cada um dos blocos de 64 bits para poderem ser usados como chaves na cifra DES.
+		
+	Escreve um programa python que consiga listar o conjunto das possíveis chaves que foram usados para cifrar os conjuntos de pares (texto, cifra) apresentados a seguir. Os conjuntos de pares apresentados correspondem a cifras com chaves de tamanho crescente, portanto nos respectivos ataques tens que ter um crescente cuidado com a eficiência do programa, por forma que este consiga obter a resposta pedida em tempo útil. 
+		
+	Até ao fim do dia 18 de Janeiro de 2019, envia para o endereço cripto1819@gmail.com, o programa python usado para efectuar este ataque assim como o conjunto de chaves que corresponde à resposta do conjunto com a chave de maior comprimento que conseguiste obter.
+	
+	16-2DES
+	(0x4698ee4949812cb6,0x370d99dd25c5f447)
+	(0xb146d0f5e596a736,0x95e412e84cf112d3)
+	
+	20-2DES
+	(0x61cae1cbe10bee15,0x4be8f15057d5fc36)
+	(0xa2db91efb628c09a,0x43e3a75620ae04a0)
+	
+	24-2DES
+	(0xd9a4b7074ee30723,0x061cfed7bfd12b12)
+	(0x96770ef6bfc2d811,0x0e3bc5a6386ce92b)
+	
+	28-2DES
+	(0x9fb49435f7c627d8,0x0b61fe6b1bc56daf)
+	(0xe050515094e08c1b,0x428711875c21b591)
+	
+	32-2DES
+	(0x55f8bccbfa5ee7b6,0x741888785a0a29c2)
+	(0xfe4df4e36e00f821,0x9167d69591fb7c12)
+
+
+	
+
