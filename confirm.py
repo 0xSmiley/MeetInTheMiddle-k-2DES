@@ -230,11 +230,11 @@ print "Ciphered: %r" % r
 print "Deciphered: ", r2
 '''
 
-m1=list(bin(int("61cae1cbe10bee15", 16))[2:])
-m2=list(bin(int("a2db91efb628c09a", 16))[2:])
+m1=list(bin(int("d9a4b7074ee30723", 16))[2:])
+m2=list(bin(int("96770ef6bfc2d811", 16))[2:])
 
-c1="0x4be8f15057d5fc36"
-c2="0x43e3a75620ae04a0"
+c1="0x61cfed7bfd12b12"
+c2="0xe3bc5a6386ce92b"
 
 m1=map(int,m1)
 m2=map(int,m2)
@@ -247,20 +247,20 @@ while len(m2) !=64:
 
 
 d=des()
-key1=list("1111111111111111111111111111111111111111111101010100001101100001")
+key1=list("1111111111111111111111111111111111111111111011110010001111001001")
 key1=map(int,key1)
 
-key2=list("1111111111111111111111111111111111111111111100010110011100001001")
+key2=list("1111111111111111111111111111111111111111000000111001000100110101")
 key2=map(int,key2)
 
 #print("cifra ", chaves)
-cifras=d.encrypt(key1,m2)
+cifras=d.encrypt(key1,m1)
 cifras=list(cifras)
 cifras=map(int,cifras)
 resp=d.encrypt(key2,cifras)
 r=hex(int(resp, 2))
-print(r,c2)
-print(c2==r)
+print(r,c1)
+print(c1==r)
 
 #print(cifras[i])
 
