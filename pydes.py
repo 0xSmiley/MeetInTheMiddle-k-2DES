@@ -1,6 +1,7 @@
 import itertools
 import timeit
 import collections
+import multiprocessing
 
 #-*- coding: utf8 -*-
 
@@ -178,7 +179,7 @@ class des():
         self.text = None
         self.chaves = list()
         
-    def run(self, key, text, action=ENCRYPT, padding=False):
+    def run(self, key, text, dic, action=ENCRYPT):
 
         self.password = key
         self.text = text
@@ -208,8 +209,8 @@ class des():
         result += self.permut(d+g, PI_1) #Do the last permut and append the result to result
         
         final_res = bit_array_to_string(result)
-
-        return final_res #Return the final string of data ciphered/deciphered
+        dic.update({final_res:bit_array_to_string(key)})
+        #return final_res #Return the final string of data ciphered/deciphered
     
     def substitute(self, d_e):#Substitute bytes using SBOX
         subblocks = nsplit(d_e, 6)#Split bit array into sublist of 6 bits
@@ -248,70 +249,75 @@ class des():
     def shift(self, g, d, n): #Shift a list of the given value
         return g[n:] + g[:n], d[n:] + d[:n]
     
-    def encrypt(self, key, text, padding=False):
-        return self.run(key, text, ENCRYPT, padding)
+    def encrypt(self, key, text,dic):
+        return self.run(key, text, dic,ENCRYPT)
     
-    def decrypt(self, key, text, padding=False):
-        tmp= self.run(key, text, DECRYPT, padding)
+    def decrypt(self, key, text,dic):
+        tmp= self.run(key, text, dic, DECRYPT)
         return tmp
 
-start = timeit.default_timer()
+def main():
+    start = timeit.default_timer()
 
-m1=hexKey2Bin("d9a4b7074ee30723")
-c1=hexKey2Bin("061cfed7bfd12b12")
-m2=hexKey2Bin("96770ef6bfc2d811")
-c2=hexKey2Bin("0e3bc5a6386ce92b")
+    m1=hexKey2Bin("9fb49435f7c627d8")
+    c1=hexKey2Bin("0b61fe6b1bc56daf")
+    m2=hexKey2Bin("e050515094e08c1b")
+    c2=hexKey2Bin("428711875c21b591")
+
+    chavestmp=gerarNchaves(28)
+    size=len(chavestmp)
+
+    stop = timeit.default_timer()
+    print("Chaves Geradas ",stop-start)
+
+    cifras={}
+    decifras={}
+    processes = []
+
+    for i in xrange(0,size):
+
+        chaves=list(chavestmp[i])
+        chaves=map(int,chaves)
+
+        d=des()
+        d.encrypt(chaves,m1,cifras)
+        d.decrypt(chaves,c1,decifras)
+
+        p1 = multiprocessing.Process(target=d.encrypt, args=(chaves,m1,cifras,))
+        processes.append(p1)
+        p1.start()
+
+        p2 = multiprocessing.Process(target=d.decrypt, args=(chaves,c1,decifras,))
+        processes.append(p2)
+        p2.start()
+
+        #decifras.update({decifrastmp:bit_array_to_string(chaves)})
+
+    for process in processes:
+        process.join()
+
+    stop = timeit.default_timer()
+    print("Cifras Completas",stop-start)
+
+    print("Ordenando")
+
+    d=collections.OrderedDict(sorted(decifras.items()))
+    stop = timeit.default_timer()
+    print("Ordenacao Decifra ",stop-start)
+
+    #Key=Cipher / Val=Chave
+    chavesDecript=d.keys()
+    valDecript=d.values()
 
 
-chavestmp=gerarNchaves(24)
-size=len(chavestmp)
+    for x,y in cifras.iteritems():
+        tmp=binary_search(chavesDecript,x)
+        if tmp!=-1:
+            print(y,valDecript[tmp])
 
-stop = timeit.default_timer()
-print("Chaves Geradas ",stop-start)
-
-cifras={}
-decifras={}
-
-for i in xrange(0,size):
-
-    chaves=list(chavestmp[i])
-    chaves=map(int,chaves)
-
-    d=des()
-    cifrastmp=d.encrypt(chaves,m1)
-    decifrastmp=d.decrypt(chaves,c1)
-
-    cifras.update({cifrastmp:bit_array_to_string(chaves)})
-    decifras.update({decifrastmp:bit_array_to_string(chaves)})
+    stop = timeit.default_timer()
+    print("Terminou",stop-start)
 
 
-stop = timeit.default_timer()
-print("Cifras Completas",stop-start)
-
-print("Ordenando")
-
-#c=collections.OrderedDict(sorted(cifras.items()))
-#stop = timeit.default_timer()
-#print("Ordenacao Cifra ",stop-start)
-
-d=collections.OrderedDict(sorted(decifras.items()))
-stop = timeit.default_timer()
-print("Ordenacao Decifra ",stop-start)
-
-#for key,val in d.items():
-#    print key, "=>", val
-
-#Key=Cipher / Val=Chave
-chavesDecript=d.keys()
-valDecript=d.values()
-
-#for i in range(0,len(chavesDecript)):
-#       print(chavesDecript[i]," => " ,valDecript[i])
-
-for x,y in cifras.iteritems():
-    tmp=binary_search(chavesDecript,x)
-    if tmp!=-1:
-        print(y,valDecript[tmp])
-
-stop = timeit.default_timer()
-print("Terminou",stop-start)
+if __name__== "__main__":
+    main()
