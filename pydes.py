@@ -113,24 +113,10 @@ PI_1 = [40, 8, 48, 16, 56, 24, 64, 32,
 #Matrix that determine the shift for each round of chaves
 SHIFT = [1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1]
 
-def string_to_bit_array(text):#Convert a string into a list of bits
-    array = list()
-    for char in text:
-        binval = binvalue(char, 8)#Get the char value on one byte
-        array.extend([int(x) for x in list(binval)]) #Add the bits to the final list
-    return array
 
 def bit_array_to_string(array): #Recreate the string from the bit array
     res = ''.join(str(e) for e in array)
     return res
-
-def binvalue(val, bitsize): #Return the binary value as a string of the given size 
-    binval = bin(val)[2:] if isinstance(val, int) else bin(ord(val))[2:]
-    if len(binval) > bitsize:
-        raise "binary value larger than the expected size"
-    while len(binval) < bitsize:
-        binval = "0"+binval #Add as many 0 as needed to get the wanted size
-    return binval
 
 def nsplit(s, n):#Split a list into sublists of size "n"
     return [s[k:k+n] for k in xrange(0, len(s), n)]
@@ -145,15 +131,13 @@ def hexKey2Bin(key):
 def gerarNchaves(n):
     uns='1'*(64-n)
     lst = list(itertools.product([0, 1], repeat=n))
+    print(1)
     size=len(lst)
     chavestmp= [None]*size
     for i in range(0,size):
         chavestmp[i]=''.join(str(e) for e in lst[i])
         chavestmp[i]=uns+chavestmp[i]
     return chavestmp
-
-def bin2hex(n):
-    return hex(int(n,2))
 
 def binary_search(arr,value):
     left = 0
@@ -188,9 +172,7 @@ class des():
         #text_blocks = nsplit(self.text, 8) #Split the text in blocks of 8 bytes so 64 bits
         result = list()
         block=self.text
-        
-        #block = string_to_bit_array(block)#Convert the block in bit array
-        #if action==DECRYPT:
+
         block = self.permut(block,PI)#Apply the initial permutation
 
         g, d = nsplit(block, 32) #g(LEFT), d(RIGHT)
@@ -207,9 +189,8 @@ class des():
             g = d
             d = tmp
         result += self.permut(d+g, PI_1) #Do the last permut and append the result to result
-        
-        final_res = bit_array_to_string(result)
-        dic.update({final_res:bit_array_to_string(key)})
+
+        dic.update({bit_array_to_string(result):bit_array_to_string(key)})
         #return final_res #Return the final string of data ciphered/deciphered
     
     def substitute(self, d_e):#Substitute bytes using SBOX
@@ -220,7 +201,6 @@ class des():
             row = int(str(block[0])+str(block[5]),2)#Get the row with the first and last bit
             column = int(''.join([str(x) for x in block[1:][:-1]]),2) #Column is the 2,3,4,5th bits
             bin = S_BOX[i][row][column] #Take the value in the SBOX appropriated for the round (i)
-            #bin = binvalue(val, 4)#Convert the value to binary
             result += [int(x) for x in bin]#And append it to the resulting list
         return result
 
@@ -235,7 +215,6 @@ class des():
     
     def generatechaves(self):#Algorithm that generates all the chaves
         self.chaves = []
-        #key = string_to_bit_array(self.password)
         key=self.password#TODO
         
         key = self.permut(key, CP_1) #Apply the initial permut on the key
@@ -259,30 +238,33 @@ class des():
 def main():
     start = timeit.default_timer()
 
+    #m1=hexKey2Bin("4698ee4949812cb6") #16k
+    #c1=hexKey2Bin("370d99dd25c5f447") #16k
     m1=hexKey2Bin("9fb49435f7c627d8")
     c1=hexKey2Bin("0b61fe6b1bc56daf")
     m2=hexKey2Bin("e050515094e08c1b")
     c2=hexKey2Bin("428711875c21b591")
 
-    chavestmp=gerarNchaves(28)
-    size=len(chavestmp)
+    n=28
+    #chavestmp=gerarNchaves(n)
+    size=2**n
 
     stop = timeit.default_timer()
-    print("Chaves Geradas ",stop-start)
 
     cifras={}
     decifras={}
-    processes = []
+    #processes = []
 
     for i in xrange(0,size):
-
-        chaves=list(chavestmp[i])
+        chaves=bin(i)[2:]
+        chaves="0"*(n-len(chaves))+chaves
+        chaves="1"*(64-n)+chaves
         chaves=map(int,chaves)
 
         d=des()
         d.encrypt(chaves,m1,cifras)
         d.decrypt(chaves,c1,decifras)
-
+    '''
         p1 = multiprocessing.Process(target=d.encrypt, args=(chaves,m1,cifras,))
         processes.append(p1)
         p1.start()
@@ -291,15 +273,13 @@ def main():
         processes.append(p2)
         p2.start()
 
-        #decifras.update({decifrastmp:bit_array_to_string(chaves)})
-
+    print("Cifras Completas ",stop-start)
+    
     for process in processes:
         process.join()
-
+'''
     stop = timeit.default_timer()
-    print("Cifras Completas",stop-start)
-
-    print("Ordenando")
+    print("Ordenando ",stop-start)
 
     d=collections.OrderedDict(sorted(decifras.items()))
     stop = timeit.default_timer()
