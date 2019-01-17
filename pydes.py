@@ -1,7 +1,6 @@
 import itertools
 import timeit
 import collections
-import multiprocessing
 
 #-*- coding: utf8 -*-
 
@@ -114,11 +113,11 @@ PI_1 = [40, 8, 48, 16, 56, 24, 64, 32,
 SHIFT = [1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1]
 
 
-def bit_array_to_string(array): #Recreate the string from the bit array
+def bit_array_to_string(array):
     res = ''.join(str(e) for e in array)
     return res
 
-def nsplit(s, n):#Split a list into sublists of size "n"
+def nsplit(s, n):
     return [s[k:k+n] for k in xrange(0, len(s), n)]
 
 def hexKey2Bin(key):
@@ -164,68 +163,65 @@ class des():
         self.chaves = list()
         
     def run(self, key, text, dic, action=ENCRYPT):
-
         self.password = key
         self.text = text
-        
-        self.generatechaves() #Generate all the chaves
-        #text_blocks = nsplit(self.text, 8) #Split the text in blocks of 8 bytes so 64 bits
+        self.generatechaves()
+
         result = list()
         block=self.text
 
-        block = self.permut(block,PI)#Apply the initial permutation
+        block = self.permut(block,PI)
 
-        g, d = nsplit(block, 32) #g(LEFT), d(RIGHT)
+        g, d = nsplit(block, 32)
         tmp = None
-        for i in range(16): #Do the 16 rounds
-            d_e = self.expand(d, E) #Expand d to match Ki size (48bits)
+        for i in range(16):
+            d_e = self.expand(d, E)
             if action == ENCRYPT:
-                tmp = self.xor(self.chaves[i], d_e)#If encrypt use Ki
+                tmp = self.xor(self.chaves[i], d_e)
             else:
-                tmp = self.xor(self.chaves[15-i], d_e)#If decrypt start by the last key
-            tmp = self.substitute(tmp) #Method that will apply the SBOXes
+                tmp = self.xor(self.chaves[15-i], d_e)
+            tmp = self.substitute(tmp)
             tmp = self.permut(tmp, P)
             tmp = self.xor(g, tmp)
             g = d
             d = tmp
-        result += self.permut(d+g, PI_1) #Do the last permut and append the result to result
+        result += self.permut(d+g, PI_1)
 
         dic.update({bit_array_to_string(result):bit_array_to_string(key)})
-        #return final_res #Return the final string of data ciphered/deciphered
-    
-    def substitute(self, d_e):#Substitute bytes using SBOX
-        subblocks = nsplit(d_e, 6)#Split bit array into sublist of 6 bits
+        #return final_res
+
+    def substitute(self, d_e):
+        subblocks = nsplit(d_e, 6)
         result = list()
-        for i in range(len(subblocks)): #For all the sublists
+        for i in range(len(subblocks)):
             block = subblocks[i]
-            row = int(str(block[0])+str(block[5]),2)#Get the row with the first and last bit
-            column = int(''.join([str(x) for x in block[1:][:-1]]),2) #Column is the 2,3,4,5th bits
-            bin = S_BOX[i][row][column] #Take the value in the SBOX appropriated for the round (i)
-            result += [int(x) for x in bin]#And append it to the resulting list
+            row = int(str(block[0])+str(block[5]),2)
+            column = int(''.join([str(x) for x in block[1:][:-1]]),2)
+            bin = S_BOX[i][row][column]
+            result += [int(x) for x in bin]
         return result
 
-    def permut(self, block, table):#Permut the given block using the given table (so generic method)
+    def permut(self, block, table):
         return [block[x-1] for x in table]
 
-    def expand(self, block, table):#Do the exact same thing than permut but for more clarity has been renamed
+    def expand(self, block, table):
         return [block[x-1] for x in table]
     
-    def xor(self, t1, t2):#Apply a xor and return the resulting list
+    def xor(self, t1, t2):
         return [x^y for x,y in zip(t1,t2)]
     
-    def generatechaves(self):#Algorithm that generates all the chaves
+    def generatechaves(self):
         self.chaves = []
-        key=self.password#TODO
-        
-        key = self.permut(key, CP_1) #Apply the initial permut on the key
-        
-        g, d = nsplit(key, 28) #Split it in to (g->LEFT),(d->RIGHT)
-        for i in range(16):#Apply the 16 rounds
-            g, d = self.shift(g, d, SHIFT[i]) #Apply the shift associated with the round (not always 1)
-            tmp = g + d #Merge them
-            self.chaves.append(self.permut(tmp, CP_2)) #Apply the permut to get the Ki
+        key=self.password
+        key = self.permut(key, CP_1)
 
-    def shift(self, g, d, n): #Shift a list of the given value
+        g, d = nsplit(key, 28)
+        for i in range(16):
+            g, d = self.shift(g, d, SHIFT[i])
+            tmp = g + d
+            self.chaves.append(self.permut(tmp, CP_2))
+
+    def shift(self, g, d, n):
         return g[n:] + g[:n], d[n:] + d[:n]
     
     def encrypt(self, key, text,dic):
@@ -238,15 +234,9 @@ class des():
 def main():
     start = timeit.default_timer()
 
-    #m1=hexKey2Bin("4698ee4949812cb6") #16k
-    #c1=hexKey2Bin("370d99dd25c5f447") #16k
     m1=hexKey2Bin("9fb49435f7c627d8")
     c1=hexKey2Bin("0b61fe6b1bc56daf")
-    m2=hexKey2Bin("e050515094e08c1b")
-    c2=hexKey2Bin("428711875c21b591")
-
     n=28
-    #chavestmp=gerarNchaves(n)
     size=2**n
 
     stop = timeit.default_timer()
@@ -264,20 +254,7 @@ def main():
         d=des()
         d.encrypt(chaves,m1,cifras)
         d.decrypt(chaves,c1,decifras)
-    '''
-        p1 = multiprocessing.Process(target=d.encrypt, args=(chaves,m1,cifras,))
-        processes.append(p1)
-        p1.start()
 
-        p2 = multiprocessing.Process(target=d.decrypt, args=(chaves,c1,decifras,))
-        processes.append(p2)
-        p2.start()
-
-    print("Cifras Completas ",stop-start)
-    
-    for process in processes:
-        process.join()
-'''
     stop = timeit.default_timer()
     print("Ordenando ",stop-start)
 

@@ -1,0 +1,7 @@
+
+28-2DES
+	(0x9fb49435f7c627d8,0x0b61fe6b1bc56daf)
+	(0xe050515094e08c1b,0x428711875c21b591)
+
+Key1=0xfffffffff39bc34f
+Key2=0xfffffffff571b9bd
